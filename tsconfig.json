@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "declaration": true,
+    "sourceMap": true,
+    "jsx": "react",
+    "noLib": false,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "experimentalDecorators": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "noUnusedParameters": false,
+    "noImplicitThis": false,
+    "traceResolution": false,
+    "lib": [ "es2016", "dom" ],
+    "outDir": "./lib"
+  },
+  "exclude": [ "node_modules/", "lib/" ],
+  "include": [ "src/*.ts" ]
+}
