@@ -19,6 +19,7 @@ export type OriginReducer<State> = {
 export interface ModelOptions<State> {
   defaultState: State;
   prefix?: string;
+  handlers?: { [key: string]: Model<any> | ModelHandler<State> }
 }
 
 export type ModelReduxAction = {
@@ -27,34 +28,47 @@ export type ModelReduxAction = {
 }
 
 export class Model<State> {
+  $parent?: Model<any>;
+  $root?: Model<any>;
   $defaultState: State;
   $prefix: string;
   $models: ModelMap<any>;
   $handlers: ModelHandlerMap<State>;
   $originReducer: OriginReducer<State>;
 
-  constructor({ defaultState, prefix }: ModelOptions<State>) {
+  constructor({ defaultState, prefix, handlers }: ModelOptions<State>) {
     this.$defaultState = defaultState || {};
     this.$prefix = prefix || '@m-react-redux';
     this.$models = {};
     this.$handlers = {};
     this.$originReducer = {};
+    if (handlers) {
+      this.handlers(handlers);
+    }
   }
 
-  hanleOriginReducer(key: string, handler: ReduxReducer<State>): void {
+  handleOriginReducer(key: string, handler: ReduxReducer<State>): void {
     if (handler && typeof handler === 'function') {
       this.$originReducer[key] = handler;
     }
   }
 
-  hanle(key: string, handler: Model<any> | ModelHandler<State>) {
+  handle(key: string, handler: Model<any> | ModelHandler<State>) {
     if (handler) {
       if (handler instanceof Model) {
+        handler.$parent = this;
+        handler.$root = this.$root || this;
         this.$models[key] = handler;
       } else if (typeof handler === 'function') {
         this.$handlers[key] = handler;
       }
     }
+  }
+
+  handlers(handlers: { [key: string]: Model<any> | ModelHandler<State> }) {
+    Object.keys(handlers).forEach((key: string) => {
+      this.handle(key, handlers[key]);
+    })
   }
 
   toReducerAction(dispatch: ReduxDispatch<ModelReduxAction>, prefix?: string): any {
