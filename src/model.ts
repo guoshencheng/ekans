@@ -1,13 +1,13 @@
 import { Dispatch as ReduxDispatch } from 'redux';
 
-export type ReducerMap<State> = {
-  [key: string]: Reducer<State>
+export type ModelMap<State> = {
+  [key: string]: Model<State>
 }
 
-export type ReducerHandler<State> = (state: State, payload: any) => any
+export type ModelHandler<State> = (state: State, payload: any) => any
 
-export type ReducerHandlerMap<State> = {
-  [key: string]: ReducerHandler<State>
+export type ModelHandlerMap<State> = {
+  [key: string]: ModelHandler<State>
 }
 
 export type ReduxReducer<State> = (state: State, action: any) => any;
@@ -16,27 +16,27 @@ export type OriginReducer<State> = {
   [key: string]: ReduxReducer<State>
 }
 
-export interface ReducerOptions<State> {
+export interface ModelOptions<State> {
   defaultState: State;
   prefix?: string;
 }
 
-export type ReducerAction = {
+export type ModelReduxAction = {
   type: string,
   payload?: any
 }
 
-export class Reducer<State> {
+export class Model<State> {
   $defaultState: State;
   $prefix: string;
-  $reducers: ReducerMap<any>;
-  $handlers: ReducerHandlerMap<State>;
+  $models: ModelMap<any>;
+  $handlers: ModelHandlerMap<State>;
   $originReducer: OriginReducer<State>;
 
-  constructor({ defaultState, prefix }: ReducerOptions<State>) {
+  constructor({ defaultState, prefix }: ModelOptions<State>) {
     this.$defaultState = defaultState || {};
     this.$prefix = prefix || '@m-react-redux';
-    this.$reducers = {};
+    this.$models = {};
     this.$handlers = {};
     this.$originReducer = {};
   }
@@ -47,17 +47,17 @@ export class Reducer<State> {
     }
   }
 
-  hanle(key: string, handler: Reducer<any> | ReducerHandler<State>) {
+  hanle(key: string, handler: Model<any> | ModelHandler<State>) {
     if (handler) {
-      if (handler instanceof Reducer) {
-        this.$reducers[key] = handler;
+      if (handler instanceof Model) {
+        this.$models[key] = handler;
       } else if (typeof handler === 'function') {
         this.$handlers[key] = handler;
       }
     }
   }
 
-  toReducerAction(dispatch: ReduxDispatch<ReducerAction>, prefix?: string): any {
+  toReducerAction(dispatch: ReduxDispatch<ModelReduxAction>, prefix?: string): any {
     prefix = prefix || this.$prefix;
     let actions = {};
     /**
@@ -71,8 +71,8 @@ export class Reducer<State> {
       })
     })
     // 将子reducer的处理后的actions，关联到当前的actions上
-    Object.keys(this.$reducers).forEach((key: string) => {
-      actions[key] = this.$reducers[key].toReducerAction(dispatch, `${prefix}/${key}`);
+    Object.keys(this.$models).forEach((key: string) => {
+      actions[key] = this.$models[key].toReducerAction(dispatch, `${prefix}/${key}`);
     })
     return actions;
   }
@@ -83,7 +83,7 @@ export class Reducer<State> {
     Object.keys(this.$handlers).forEach((key: string) => {
       handlers[`${prefix}/${key}`] = this.$handlers[key];
     });
-    return (state: any, action: ReducerAction) => {
+    return (state: any, action: ModelReduxAction) => {
       let nextState = { ...(state || this.$defaultState) };
 
       // 使用当前reducer的处理函数处理后返回新的state
@@ -102,11 +102,11 @@ export class Reducer<State> {
         });
 
       // 递归的让子reducer进行处理当前state的子节点
-      Object.keys(this.$reducers)
-        .filter((key: string) => Boolean(this.$reducers[key]))
+      Object.keys(this.$models)
+        .filter((key: string) => Boolean(this.$models[key]))
         .forEach(key => {
-          const reducer = this.$reducers[key];
-          nextState[key] = reducer.toReduxReducers(`${prefix}/${key}`)(nextState[key], action);
+          const model = this.$models[key];
+          nextState[key] = model.toReduxReducers(`${prefix}/${key}`)(nextState[key], action);
         })
       return nextState;
     }
