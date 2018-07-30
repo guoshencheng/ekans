@@ -1,30 +1,36 @@
 import { Dispatch as ReduxDispatch } from 'redux';
 
-export type ModelMap<State> = {
-  [key: string]: Model<State>
+export type Map<T> = {
+  [key: string]: T
 }
+
+export type ModelMap<State> = Map<Model<State>>
 
 export type ModelHandler<State> = (state: State, payload: any) => any
 
-export type ModelHandlerMap<State> = {
-  [key: string]: ModelHandler<State>
-}
+export type ModelHandlerMap<State> = Map<ModelHandler<State>>
 
 export type ReduxReducer<State> = (state: State, action: any) => any;
 
-export type OriginReducer<State> = {
-  [key: string]: ReduxReducer<State>
-}
-
-export interface ModelOptions<State> {
-  defaultState: State;
-  prefix?: string;
-  handlers?: { [key: string]: Model<any> | ModelHandler<State> }
-}
+export type OriginReducer<State> = Map<ReduxReducer<State>>
 
 export type ModelReduxAction = {
   type: string,
   payload?: any
+}
+
+export type ModelDispatchBindedAction<Props> = (value: Props) => void;
+export type MapModelDispatchBindedAction<Props> = Map<ModelDispatchBindedAction<Props>> | Map<Map<ModelDispatchBindedAction<Props>>>
+
+export type AsyncAction<Context, State> = (info: Context, getState: () => State, dispatch: (_: ModelReduxAction) => void ) => void
+export type ModelAction<Props, Context, State> = (value: Props) => AsyncAction<Context, State>
+export type ModelActionMap = Map<ModelAction<any, any, any>>
+
+export interface ModelOptions<State> {
+  defaultState: State;
+  prefix?: string;
+  handlers?: Map<Model<any> | ModelHandler<State>>
+  actions?: ModelActionMap;
 }
 
 export class Model<State> {
@@ -35,15 +41,20 @@ export class Model<State> {
   $models: ModelMap<any>;
   $handlers: ModelHandlerMap<State>;
   $originReducer: OriginReducer<State>;
+  $actions: ModelActionMap;
 
-  constructor({ defaultState, prefix, handlers }: ModelOptions<State>) {
+  constructor({ defaultState, prefix, handlers, actions }: ModelOptions<State>) {
     this.$defaultState = defaultState || {};
     this.$prefix = prefix || '@m-react-redux';
     this.$models = {};
     this.$handlers = {};
     this.$originReducer = {};
+    this.$actions = {};
     if (handlers) {
       this.handlers(handlers);
+    }
+    if (actions) {
+      this.$actions = actions;
     }
   }
 
@@ -71,7 +82,22 @@ export class Model<State> {
     })
   }
 
-  toReducerAction(dispatch: ReduxDispatch<ModelReduxAction>, prefix?: string): any {
+  toReduxActions(dispatch: ReduxDispatch<any>): MapModelDispatchBindedAction<any> {
+    const actions = {};
+    Object.keys(this.$actions).forEach(key => {
+      const action = this.$actions[key];
+      actions[key] = function(params: any) {
+        dispatch(action(params));
+      }
+    })
+    Object.keys(this.$models).forEach(key => {
+      const model = this.$models[key];
+      actions[key] = model.toReduxActions(dispatch);
+    })
+    return actions;
+  }
+
+  toReducerAction(dispatch: ReduxDispatch<ModelReduxAction>, prefix?: string): MapModelDispatchBindedAction<any> {
     prefix = prefix || this.$prefix;
     let actions = {};
     /**
@@ -91,7 +117,7 @@ export class Model<State> {
     return actions;
   }
 
-  toReduxReducers(prefix: string): ReduxReducer<State> {
+  toReduxReducers(prefix?: string): ReduxReducer<State> {
     prefix = prefix || this.$prefix;
     const handlers = {};
     Object.keys(this.$handlers).forEach((key: string) => {
