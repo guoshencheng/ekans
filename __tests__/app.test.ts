@@ -114,12 +114,12 @@ describe('测试redux的创建', () => {
   it('使用actions来修改state', () => {
     const actions = app.getActions() as MapModelDispatchBindedAction<string>;
     const A = actions.A as MapModelDispatchBindedAction<string>;
-    const changeA = A.changeA as ModelDispatchBindedAction<string>;
-    changeA('aa');
+    const changeB = A.changeB as ModelDispatchBindedAction<string>;
+    changeB('bb');
     expect(app.store.getState()).toEqual({
       A: {
         a: 'aa',
-        b: 'b',
+        b: 'bb',
       },
       B: {
         c: 'c',
