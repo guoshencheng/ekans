@@ -1,6 +1,6 @@
 {
-  "name": "m-react-redux",
-  "version": "1.0.0",
+  "name": "ekans",
+  "version": "0.0.0",
   "description": "add some global data to react redux",
   "main": "lib/index.js",
   "scripts": {
