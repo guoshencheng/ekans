@@ -17,31 +17,26 @@ function createDefaultMapDispatchToPropsFactories ({ props }: Options) {
     if (typeof mapDispatchToProps !== 'function') {
       return;
     }
-    const injectFunction = (dispatch, { displayName }) => (stateOrDispatch, ownProps) => {
-      const origin = wrapMapToPropsFunc(mapDispatchToProps, 'mapDispatchToProps')(dispatch, { displayName })(stateOrDispatch, ownProps);
-      return { ...origin, ...props };
+    function proxy(...args) {
+      const result = mapDispatchToProps(...args);
+      return { ...props, ...result };
     }
-    return injectFunction;
+    (proxy as any).dependsOnOwnProps = mapDispatchToProps.dependsOnOwnProps;
+    return wrapMapToPropsFunc(proxy, 'mapDispatchToProps');
   }
 
   function whenMapDispatchToPropsIsMissing(mapDispatchToProps) {
     if (Boolean(mapDispatchToProps)) {
       return;
     }
-    const injectFunction = (dispatch, { displayName }) => (stateOrDispatch, ownProps) => {
-      const origin = wrapMapToPropsConstant(dispatch => ({ dispatch }))(dispatch, { displayName })(stateOrDispatch, ownProps);
-      return { ...origin, ...props };
-    }
-    return injectFunction;
+    return wrapMapToPropsConstant(dispatch => ({ dispatch, ...props }));
   }
 
   function whenMapDispatchToPropsIsObject(mapDispatchToProps) {
     if (mapDispatchToProps && typeof mapDispatchToProps === 'object') {
-      const injectFunction = (dispatch, { displayName }) => (stateOrDispatch, ownProps) => {
-        const origin =  wrapMapToPropsConstant(dispatch => bindActionCreators(mapDispatchToProps, dispatch))(dispatch, { displayName })(stateOrDispatch, ownProps);
-        return { ...origin, ...props };
-      }
-      return injectFunction;
+      return wrapMapToPropsConstant(dispatch =>
+        ({ dispatch, ...bindActionCreators(mapDispatchToProps, dispatch), ...props })
+      );
     }
     return;
   }
