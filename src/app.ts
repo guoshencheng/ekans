@@ -13,7 +13,8 @@ export class App<State> {
   store: Store<State>;
   $actions: MapModelDispatchBindedAction<any>;
   $reducerActions: MapModelDispatchBindedAction<any>;
-  constructor({ model, middlewares }: AppOptions<State>) {
+  constructor(opt?: AppOptions<State>) {
+    const { model, middlewares } = opt || { middlewares: [], model: undefined };
     this.$middlewares = middlewares || [];
     this.$model = model;
     this.$reduxReducer = (state) => state;

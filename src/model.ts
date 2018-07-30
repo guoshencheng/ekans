@@ -6,11 +6,11 @@ export type Map<T> = {
 
 export type ModelMap<State> = Map<Model<State>>
 
-export type ModelHandler<State> = (state: State, payload: any) => any
+export type ModelHandler<State> = (state: State, payload: any) => State
 
 export type ModelHandlerMap<State> = Map<ModelHandler<State>>
 
-export type ReduxReducer<State> = (state: State, action: any) => any;
+export type ReduxReducer<State> = (state: State, action: any) => State;
 
 export type OriginReducer<State> = Map<ReduxReducer<State>>
 
@@ -20,14 +20,14 @@ export type ModelReduxAction = {
 }
 
 export type ModelDispatchBindedAction<Props> = (value: Props) => void;
-export type MapModelDispatchBindedAction<Props> = Map<ModelDispatchBindedAction<Props>> | Map<Map<ModelDispatchBindedAction<Props>>>
+export type MapModelDispatchBindedAction<Props> = Map<ModelDispatchBindedAction<Props>>;
 
 export type AsyncAction<Context, State> = (info: Context, getState: () => State, dispatch: (_: ModelReduxAction) => void ) => void
 export type ModelAction<Props, Context, State> = (value: Props) => AsyncAction<Context, State>
 export type ModelActionMap = Map<ModelAction<any, any, any>>
 
 export interface ModelOptions<State> {
-  defaultState: State;
+  defaultState?: State;
   prefix?: string;
   handlers?: Map<Model<any> | ModelHandler<State>>
   actions?: ModelActionMap;
@@ -36,7 +36,7 @@ export interface ModelOptions<State> {
 export class Model<State> {
   $parent?: Model<any>;
   $root?: Model<any>;
-  $defaultState: State;
+  $defaultState?: State;
   $prefix: string;
   $models: ModelMap<any>;
   $handlers: ModelHandlerMap<State>;
@@ -44,7 +44,7 @@ export class Model<State> {
   $actions: ModelActionMap;
 
   constructor({ defaultState, prefix, handlers, actions }: ModelOptions<State>) {
-    this.$defaultState = defaultState || {};
+    this.$defaultState = defaultState;
     this.$prefix = prefix || '@m-react-redux';
     this.$models = {};
     this.$handlers = {};
@@ -124,7 +124,7 @@ export class Model<State> {
       handlers[`${prefix}/${key}`] = this.$handlers[key];
     });
     return (state: any, action: ModelReduxAction) => {
-      let nextState = { ...(state || this.$defaultState) };
+      let nextState = { ...(state || this.$defaultState || {}) };
 
       // 使用当前reducer的处理函数处理后返回新的state
       if (handlers[action.type]) {
