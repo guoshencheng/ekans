@@ -19,7 +19,7 @@ function createDefaultMapDispatchToPropsFactories ({ props }: Options) {
     }
     const injectFunction = (dispatch, { displayName }) => (stateOrDispatch, ownProps) => {
       const origin = wrapMapToPropsFunc(mapDispatchToProps, 'mapDispatchToProps')(dispatch, { displayName })(stateOrDispatch, ownProps);
-      return origin;
+      return { ...origin, ...props };
     }
     return injectFunction;
   }
@@ -30,7 +30,7 @@ function createDefaultMapDispatchToPropsFactories ({ props }: Options) {
     }
     const injectFunction = (dispatch, { displayName }) => (stateOrDispatch, ownProps) => {
       const origin = wrapMapToPropsConstant(dispatch => ({ dispatch }))(dispatch, { displayName })(stateOrDispatch, ownProps);
-      return origin;
+      return { ...origin, ...props };
     }
     return injectFunction;
   }
@@ -39,7 +39,7 @@ function createDefaultMapDispatchToPropsFactories ({ props }: Options) {
     if (mapDispatchToProps && typeof mapDispatchToProps === 'object') {
       const injectFunction = (dispatch, { displayName }) => (stateOrDispatch, ownProps) => {
         const origin =  wrapMapToPropsConstant(dispatch => bindActionCreators(mapDispatchToProps, dispatch))(dispatch, { displayName })(stateOrDispatch, ownProps);
-        return origin;
+        return { ...origin, ...props };
       }
       return injectFunction;
     }
