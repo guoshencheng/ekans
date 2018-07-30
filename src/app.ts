@@ -1,6 +1,7 @@
 import { Model, ReduxReducer, MapModelDispatchBindedAction } from './model';
 import { Middleware, Store, createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import thunk from './thunk';
 
 export interface AppOptions<State> {
   model?: Model<State>;
@@ -15,7 +16,7 @@ export class App<State> {
   $reducerActions: MapModelDispatchBindedAction<any>;
   constructor(opt?: AppOptions<State>) {
     const { model, middlewares } = opt || { middlewares: [], model: undefined };
-    this.$middlewares = middlewares || [];
+    this.middlewares(middlewares as Middleware[]);
     this.$model = model;
     this.$reduxReducer = (state) => state;
   }
@@ -29,10 +30,10 @@ export class App<State> {
     this.$actions = this.$model.toReduxActions(this.store.dispatch);
     this.$reducerActions = this.$model.toReducerAction(this.store.dispatch);
   }
-  getActions(): MapModelDispatchBindedAction<any> {
+  getActions = (): MapModelDispatchBindedAction<any> => {
     return this.$actions;
   }
-  getReducerActions(): MapModelDispatchBindedAction<any> {
+  getReducerActions = (): MapModelDispatchBindedAction<any> => {
     return this.$reducerActions;
   }
   model(model: Model<State>) {
@@ -44,6 +45,7 @@ export class App<State> {
     }
   }
   middlewares(middlewares: Middleware[]) {
-    this.$middlewares = middlewares;
+    middlewares = middlewares || [];
+    this.$middlewares = [ thunk.withExtraArgument(this), ...middlewares ];
   }
 }

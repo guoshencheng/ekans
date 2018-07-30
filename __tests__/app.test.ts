@@ -1,4 +1,4 @@
-import { App, Model } from '../src';
+import { App, Model, MapModelDispatchBindedAction, ModelDispatchBindedAction } from '../src';
 
 type AState = {
   a: string,
@@ -29,8 +29,18 @@ const A = new Model<AState>({
     }
   },
   actions: {
-    changeA: (a: string) => ({ getReducerActions } :App<CState>) => getReducerActions().CHANGE_A(a),
-    changeB: (b: string) => ({ getReducerActions } :App<CState>) => getReducerActions().changeB(b),
+    changeA: (a: string) => ({ getReducerActions } :App<CState>) => {
+      const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
+      const A = actions.A as MapModelDispatchBindedAction<string>;
+      const CHANGE_A = A.CHANGE_A as ModelDispatchBindedAction<string>;
+      return CHANGE_A(a);
+    },
+    changeB: (b: string) => ({ getReducerActions } :App<CState>) => {
+      const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
+      const A = actions.A as MapModelDispatchBindedAction<string>;
+      const CHANGE_B = A.CHANGE_B as ModelDispatchBindedAction<string>;
+      return CHANGE_B(b);
+    },
   }
 });
 
@@ -48,8 +58,18 @@ const B = new Model<BState>({
     }
   },
   actions: {
-    changeC: (c: string) => ({ getReducerActions } :App<CState>) => getReducerActions().CHANGE_C(c),
-    changeD: (d: string[]) => ({ getReducerActions } :App<CState>) => getReducerActions().CHANGE_D(d),
+    changeC: (c: string) => ({ getReducerActions } :App<CState>) => {
+      const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
+      const B = actions.B as MapModelDispatchBindedAction<string>;
+      const CHANGE_C = B.CHANGE_C as ModelDispatchBindedAction<string>;
+      return CHANGE_C(c);
+    },
+    changeD: (d: string) => ({ getReducerActions } :App<CState>) => {
+      const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
+      const B = actions.B as MapModelDispatchBindedAction<string>;
+      const CHANGE_D = B.CHANGE_D as ModelDispatchBindedAction<string>;
+      return CHANGE_D(d);
+    },
   }
 });
 
@@ -75,4 +95,36 @@ describe('测试redux的创建', () => {
       }
     })
   })
+  it('使用reducerAction来修改state', () => {
+    const actions = app.getReducerActions() as MapModelDispatchBindedAction<string>;
+    const A = actions.A as MapModelDispatchBindedAction<string>;
+    const CHANGE_A = A.CHANGE_A as ModelDispatchBindedAction<string>;
+    CHANGE_A('aa');
+    expect(app.store.getState()).toEqual({
+      A: {
+        a: 'aa',
+        b: 'b',
+      },
+      B: {
+        c: 'c',
+        d: ['d']
+      }
+    })
+  });
+  it('使用actions来修改state', () => {
+    const actions = app.getActions() as MapModelDispatchBindedAction<string>;
+    const A = actions.A as MapModelDispatchBindedAction<string>;
+    const changeA = A.changeA as ModelDispatchBindedAction<string>;
+    changeA('aa');
+    expect(app.store.getState()).toEqual({
+      A: {
+        a: 'aa',
+        b: 'b',
+      },
+      B: {
+        c: 'c',
+        d: ['d']
+      }
+    })
+  });
 })

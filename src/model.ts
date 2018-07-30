@@ -20,7 +20,9 @@ export type ModelReduxAction = {
 }
 
 export type ModelDispatchBindedAction<Props> = (value: Props) => void;
-export type MapModelDispatchBindedAction<Props> = Map<ModelDispatchBindedAction<Props>>;
+export type MapModelDispatchBindedAction<Props> = Map<ModelDispatchBindedAction<Props>> | {
+  [key: string]: MapModelDispatchBindedAction<Props>
+};
 
 export type AsyncAction<Context, State> = (info: Context, getState: () => State, dispatch: (_: ModelReduxAction) => void ) => void
 export type ModelAction<Props, Context, State> = (value: Props) => AsyncAction<Context, State>
