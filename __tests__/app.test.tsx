@@ -140,7 +140,7 @@ describe('测试redux的创建', () => {
 })
 
 describe('createConnect 函数可以自定义inject一些属性', () => {
-  const app = new App();
+  const app = instance;
   app.model(C);
   app.init();
   test('在connect的组件中，会inject自定义的属性', () => {
