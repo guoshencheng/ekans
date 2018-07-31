@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Provider } from 'react-redux';
 import * as ReactDOMServer from 'react-dom/server';
 
 import {
@@ -160,12 +159,21 @@ describe('createConnect 函数可以自定义inject一些属性', () => {
       expect(props.getReducerActions).not.toBeNull();
       return <div />
     })
-    const container = (
-      <Provider store={app.store}>
+    const Provider = app.Provider;
+    expect(ReactDOMServer.renderToString((
+      <Provider>
         <Comp />
       </Provider>
-    )
-    const result = ReactDOMServer.renderToString(container);
-    expect(result).toEqual('<div data-reactroot=\"\"></div>');
+    ))).toEqual('<div data-reactroot=\"\"></div>');
+    expect(ReactDOMServer.renderToString((
+      <Provider>
+        <CompA />
+      </Provider>
+    ))).toEqual('<div data-reactroot=\"\"></div>');
+    expect(ReactDOMServer.renderToString((
+      <Provider>
+        <CompB />
+      </Provider>
+    ))).toEqual('<div data-reactroot=\"\"></div>');
   })
 });

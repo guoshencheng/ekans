@@ -1,5 +1,7 @@
 import { Model, ReduxReducer, MapModelDispatchBindedAction } from './model';
+import * as React from 'react';
 import { Middleware, Store, createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from './thunk';
 
@@ -19,6 +21,13 @@ export class App<State> {
     this.middlewares(middlewares as Middleware[]);
     this.$model = model;
     this.$reduxReducer = (state) => state;
+  }
+  Provider = ({ children }) => {
+    return (
+      <Provider store={this.store}>
+        { children }
+      </Provider>
+    )
   }
   init() {
     if (!this.$model) {
