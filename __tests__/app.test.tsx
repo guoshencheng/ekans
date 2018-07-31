@@ -150,6 +150,16 @@ describe('createConnect 函数可以自定义inject一些属性', () => {
       expect(props.getReducerActions).not.toBeNull();
       return <div />
     })
+    const CompA = connect(null, {})((props) => {
+      expect(props.getActions).not.toBeNull();
+      expect(props.getReducerActions).not.toBeNull();
+      return <div />
+    })
+    const CompB = connect(null, () => ({}))((props) => {
+      expect(props.getActions).not.toBeNull();
+      expect(props.getReducerActions).not.toBeNull();
+      return <div />
+    })
     const container = (
       <Provider store={app.store}>
         <Comp />
