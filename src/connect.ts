@@ -69,5 +69,3 @@ export function createConnect({
     ...options,
   })
 }
-
-export const connect = createConnect();
