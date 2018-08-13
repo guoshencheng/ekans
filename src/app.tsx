@@ -6,11 +6,13 @@ import { Provider } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from './thunk';
 
-export interface AppOptions<State> {
+export interface AppOptions<State, Extra> {
+  extra?: Extra;
   model?: Model<State>;
   middlewares?: Middleware[];
 }
-export class App<State> extends EventEmitter {
+export class App<State, Extra extends any> extends EventEmitter {
+  $extra: Extra;
   static FINISH_INIT = 'FINISH_INIT'
   static BEFORE_INIT = 'BEFORE_INIT'
   $model?: Model<State>;
@@ -19,9 +21,10 @@ export class App<State> extends EventEmitter {
   store: Store<State>;
   $actions: MapModelDispatchBindedAction<any>;
   $reducerActions: MapModelDispatchBindedAction<any>;
-  constructor(opt?: AppOptions<State>) {
+  constructor(opt?: AppOptions<State, Extra>) {
     super();
-    const { model, middlewares } = opt || { middlewares: [], model: undefined };
+    const { model, middlewares, extra } = opt || { middlewares: [], model: undefined, extra: {} };
+    this.$extra = extra || {} as any;
     this.middlewares(middlewares as Middleware[]);
     this.$model = model;
     this.$reduxReducer = (state) => state;
@@ -44,6 +47,9 @@ export class App<State> extends EventEmitter {
     this.$actions = this.$model.toReduxActions(this.store.dispatch);
     this.$reducerActions = this.$model.toReducerAction(this.store.dispatch);
     this.emit(App.FINISH_INIT, this);
+  }
+  getExtra = (): Extra => {
+    return this.$extra;
   }
   getActions = (): MapModelDispatchBindedAction<any> => {
     return this.$actions;

@@ -4,6 +4,7 @@ import {
   MapStateToPropsFactory,
   MapDispatchToPropsFactory,
 } from 'react-redux';
+import { App } from './app';
 import { createConnect as create } from 'react-redux/lib/connect/connect';
 import { bindActionCreators } from 'redux';
 import { wrapMapToPropsConstant, wrapMapToPropsFunc } from 'react-redux/lib/connect/wrapMapToProps';
@@ -49,19 +50,24 @@ function createDefaultMapDispatchToPropsFactories ({ props }: Options) {
   return defaultMapDispatchToPropsFactories;
 }
 
-interface createConnectOptions {
+interface createConnectOptions<State, Extra> {
   connectHOC?: AdvancedComponentDecorator<any, any>;
   mapStateToPropsFactories?: MapStateToPropsFactory<any, any, any>;
   mapDispatchToPropsFactories?: MapDispatchToPropsFactory<any, any>;
   mergePropsFactories?: any;
   selectorFactory?: SelectorFactory<any, any, any, any>;
   props?: any;
+  app?: App<State, Extra>;
 }
 
-export function createConnect({
+export function createConnect<State, Extra extends any>({
+  app,
   props,
   ...options
-}: createConnectOptions = {}) {
+}: createConnectOptions<State, Extra> = {}) {
+  props = app ?
+    { ...props, getActions: app.getActions, getReducerActions: app.getReducerActions, ...(app.getExtra() as any) }
+    : props;
   return create({
     mapDispatchToPropsFactories: createDefaultMapDispatchToPropsFactories({
       props

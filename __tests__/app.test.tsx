@@ -39,13 +39,13 @@ const A = new Model<AState>({
     }
   },
   actions: {
-    changeA: (a: string) => ({ getReducerActions } :App<CState>) => {
+    changeA: (a: string) => ({ getReducerActions } :App<CState, any>) => {
       const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
       const A = actions.A as MapModelDispatchBindedAction<string>;
       const CHANGE_A = A.CHANGE_A as ModelDispatchBindedAction<string>;
       return CHANGE_A(a);
     },
-    changeB: (b: string) => ({ getReducerActions } :App<CState>) => {
+    changeB: (b: string) => ({ getReducerActions } :App<CState, any>) => {
       const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
       const A = actions.A as MapModelDispatchBindedAction<string>;
       const CHANGE_B = A.CHANGE_B as ModelDispatchBindedAction<string>;
@@ -68,13 +68,13 @@ const B = new Model<BState>({
     }
   },
   actions: {
-    changeC: (c: string) => ({ getReducerActions } :App<CState>) => {
+    changeC: (c: string) => ({ getReducerActions } :App<CState, any>) => {
       const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
       const B = actions.B as MapModelDispatchBindedAction<string>;
       const CHANGE_C = B.CHANGE_C as ModelDispatchBindedAction<string>;
       return CHANGE_C(c);
     },
-    changeD: (d: string) => ({ getReducerActions } :App<CState>) => {
+    changeD: (d: string) => ({ getReducerActions } :App<CState, any>) => {
       const actions = getReducerActions() as MapModelDispatchBindedAction<string>;
       const B = actions.B as MapModelDispatchBindedAction<string>;
       const CHANGE_D = B.CHANGE_D as ModelDispatchBindedAction<string>;
