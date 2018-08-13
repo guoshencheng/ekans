@@ -1,6 +1,6 @@
 {
   "name": "ekans",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "add some global data to react redux",
   "main": "lib/index.js",
   "scripts": {
@@ -40,6 +40,7 @@
     "fbemitter": "^2.1.1",
     "react": "^16.4.1",
     "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
     "redux-devtools-extension": "^2.13.5"
   }
 }
